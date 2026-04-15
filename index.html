@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>コアラジム</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --g1:#2D5016;--g2:#4A7C2F;--g3:#6BA348;--g4:#8FBF6A;--g5:#C5DFA8;--g6:#EAF3DE;
+    --b1:#4A3728;--b2:#7A5C42;--b3:#A67C5B;
+    --cream:#F8F4EE;--white:#FFFFFF;
+    --text1:#1A2E0A;--text2:#3D5C22;--text3:#6B8F4E;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Noto Sans JP',sans-serif;background:var(--cream);color:var(--text1);max-width:390px;margin:0 auto;min-height:100vh;position:relative;overflow-x:hidden}
+  
+  /* ===== SCREENS ===== */
+  .screen{display:none;min-height:100vh;padding-bottom:80px}
+  .screen.active{display:block}
+  
+  /* ===== LOGIN ===== */
+  #s-login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;background:linear-gradient(160deg,#2D5016 0%,#4A7C2F 50%,#6BA348 100%)}
+  .login-logo{text-align:center;margin-bottom:2rem}
+  .koala-icon{font-size:64px;line-height:1;display:block;margin-bottom:.5rem}
+  .gym-name{font-size:28px;font-weight:700;color:#fff;letter-spacing:.05em}
+  .gym-sub{font-size:13px;color:rgba(255,255,255,.7);margin-top:4px}
+  .login-card{background:#fff;border-radius:20px;padding:2rem;width:100%;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,.15)}
+  .login-card h2{font-size:16px;font-weight:600;color:var(--text1);margin-bottom:1.5rem;text-align:center}
+  .input-group{margin-bottom:1rem}
+  .input-group label{display:block;font-size:12px;color:var(--text3);margin-bottom:6px;font-weight:500}
+  .input-group input{width:100%;padding:12px 14px;border:1.5px solid #D4E8C2;border-radius:10px;font-size:15px;color:var(--text1);background:var(--cream);outline:none;transition:border-color .2s}
+  .input-group input:focus{border-color:var(--g2)}
+  .btn-login{width:100%;padding:14px;background:var(--g2);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;margin-top:.5rem;transition:background .2s}
+  .btn-login:active{background:var(--g1)}
+  .login-note{font-size:11px;color:#999;text-align:center;margin-top:1rem}
+  
+  /* ===== TOP BAR ===== */
+  .topbar{background:var(--g2);color:#fff;padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .topbar-logo{font-size:18px;font-weight:700;display:flex;align-items:center;gap:6px}
+  .topbar-logo span:first-child{font-size:22px}
+  .topbar-user{font-size:12px;color:rgba(255,255,255,.8);background:rgba(255,255,255,.15);padding:4px 10px;border-radius:20px}
+  
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:#fff;border-top:1px solid #E0EDD0;display:flex;padding:8px 0 20px;z-index:200}
+  .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0;border:none;background:none}
+  .nav-icon{font-size:20px;line-height:1}
+  .nav-label{font-size:10px;color:#999;font-weight:500}
+  .nav-item.active .nav-label{color:var(--g2);font-weight:700}
+  .nav-item.active .nav-icon{filter:none}
+  
+  /* ===== HOME ===== */
+  .hero-banner{background:linear-gradient(135deg,var(--g1),var(--g2));padding:20px 16px;color:#fff}
+  .hero-banner h2{font-size:18px;font-weight:700}
+  .hero-banner p{font-size:13px;color:rgba(255,255,255,.8);margin-top:4px}
+  .section{padding:16px}
+  .section-title{font-size:14px;font-weight:700;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+  .card{background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid #E0EDD0}
+  .card-row{display:flex;align-items:center;gap:12px}
+  .card-thumb{width:56px;height:56px;border-radius:10px;background:var(--g5);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+  .card-info h3{font-size:14px;font-weight:600;color:var(--text1)}
+  .card-info p{font-size:12px;color:var(--text3);margin-top:2px}
+  .badge{display:inline-block;background:var(--g5);color:var(--g1);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:4px}
+  .badge.new{background:#FFF3CD;color:#856404}
+  
+  /* ===== VIDEO ===== */
+  .video-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px}
+  .video-card{background:#fff;border-radius:12px;overflow:hidden;border:1px solid #E0EDD0}
+  .video-thumb{width:100%;aspect-ratio:16/9;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:28px;position:relative}
+  .play-btn{position:absolute;width:32px;height:32px;background:rgba(255,255,255,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px}
+  .video-info{padding:8px}
+  .video-info p{font-size:11px;font-weight:600;color:var(--text1);line-height:1.3}
+  .video-cat{font-size:10px;color:var(--text3);margin-top:3px}
+  .filter-bar{display:flex;gap:8px;padding:12px 16px 4px;overflow-x:auto}
+  .filter-btn{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid #D4E8C2;background:#fff;color:var(--text2);cursor:pointer}
+  .filter-btn.active{background:var(--g2);color:#fff;border-color:var(--g2)}
+  
+  /* ===== PHOTOS ===== */
+  .photo-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;padding:16px 16px 0}
+  .photo-item{aspect-ratio:1;background:var(--g4);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;overflow:hidden}
+  .photo-item:nth-child(2n){background:var(--g5)}
+  .photo-item:nth-child(3n){background:var(--g3)}
+  
+  /* ===== COUPON ===== */
+  .coupon-card{background:#fff;border-radius:16px;margin:0 16px 16px;overflow:hidden;border:2px dashed var(--g3)}
+  .coupon-header{background:var(--g2);padding:14px 16px;color:#fff;display:flex;align-items:center;gap:10px}
+  .coupon-header .ico{font-size:24px}
+  .coupon-header h3{font-size:15px;font-weight:700}
+  .coupon-header p{font-size:11px;color:rgba(255,255,255,.8);margin-top:2px}
+  .coupon-body{padding:16px;text-align:center}
+  .coupon-discount{font-size:42px;font-weight:800;color:var(--g1);line-height:1}
+  .coupon-discount span{font-size:18px}
+  .coupon-desc{font-size:13px;color:var(--text2);margin:8px 0}
+  .coupon-expiry{font-size:11px;color:#e74c3c;font-weight:600;margin-top:8px}
+  .coupon-barcode{margin-top:12px;background:var(--cream);border-radius:8px;padding:10px;font-size:11px;color:var(--text3);letter-spacing:.1em}
+  
+  /* ===== BLOG ===== */
+  .blog-card{background:#fff;border-radius:14px;margin:0 16px 12px;padding:16px;border:1px solid #E0EDD0}
+  .blog-meta{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .avatar{width:32px;height:32px;border-radius:50%;background:var(--g2);display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:700;flex-shrink:0}
+  .blog-author{font-size:12px;font-weight:600;color:var(--text2)}
+  .blog-date{font-size:11px;color:var(--text3)}
+  .blog-card h3{font-size:15px;font-weight:700;color:var(--text1);margin-bottom:6px;line-height:1.4}
+  .blog-card p{font-size:13px;color:var(--text2);line-height:1.6}
+  .blog-read{font-size:12px;color:var(--g2);font-weight:700;margin-top:8px;display:inline-block}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="s-login" class="screen active">
+  <div class="login-logo">
+    <span class="koala-icon">🐨</span>
+    <div class="gym-name">KOALA GYM</div>
+    <div class="gym-sub">会員専用ポータル</div>
+  </div>
+  <div class="login-card">
+    <h2>ログイン</h2>
+    <div class="input-group">
+      <label>会員ID</label>
+      <input type="text" id="inp-id" placeholder="例：user001">
+    </div>
+    <div class="input-group">
+      <label>パスワード</label>
+      <input type="password" id="inp-pw" placeholder="••••••••">
+    </div>
+    <button class="btn-login" onclick="doLogin()">ログイン</button>
+    <p class="login-note">IDはトレーナーから受け取ってください</p>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="s-home" class="screen">
+  <div class="topbar">
+    <div class="topbar-logo"><span>🐨</span> KOALA GYM</div>
+    <div class="topbar-user" id="user-badge">user001</div>
+  </div>
+  <div class="hero-banner">
+    <h2>おかえりなさい！🌿</h2>
+    <p>今日もトレーニング頑張りましょう</p>
+  </div>
+  <div class="section">
+    <div class="section-title">🎬 新着動画</div>
+    <div class="card">
+      <div class="card-row">
+        <div class="card-thumb">🏋️</div>
+        <div class="card-info">
+          <h3>初心者向けスクワット</h3>
+          <p>正しいフォームをマスターしよう</p>
+          <span class="badge new">NEW</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-row">
+        <div class="card-thumb">🧘</div>
+        <div class="card-info">
+          <h3>朝のストレッチ10分</h3>
+          <p>体をほぐして一日のスタートを</p>
+          <span class="badge">人気</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🎟️ 今月のクーポン</div>
+    <div class="card">
+      <div class="card-row">
+        <div class="card-thumb">🎟</div>
+        <div class="card-info">
+          <h3>プロテイン10%OFF</h3>
+          <p>有効期限：2025年4月30日</p>
+          <span class="badge">利用可能</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">📝 店長の独り言</div>
+    <div class="card">
+      <div class="card-row">
+        <div class="card-thumb">🐨</div>
+        <div class="card-info">
+          <h3>春のトレーニングのすすめ</h3>
+          <p>暖かくなってきたので外でも...</p>
+          <span class="badge">2日前</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VIDEOS -->
+<div id="s-video" class="screen">
+  <div class="topbar">
+    <div class="topbar-logo"><span>🐨</span> 動画</div>
+    <div class="topbar-user" id="user-badge2">user001</div>
+  </div>
+  <div class="filter-bar">
+    <button class="filter-btn active">すべて</button>
+    <button class="filter-btn">筋トレ</button>
+    <button class="filter-btn">ストレッチ</button>
+    <button class="filter-btn">有酸素</button>
+    <button class="filter-btn">食事</button>
+  </div>
+  <div class="video-grid">
+    <div class="video-card"><div class="video-thumb">🏋️<div class="play-btn">▶</div></div><div class="video-info"><p>初心者スクワット</p><div class="video-cat">筋トレ</div></div></div>
+    <div class="video-card"><div class="video-thumb" style="background:var(--g2)">🧘<div class="play-btn">▶</div></div><div class="video-info"><p>朝のストレッチ10分</p><div class="video-cat">ストレッチ</div></div></div>
+    <div class="video-card"><div class="video-thumb" style="background:var(--b1)">🏃<div class="play-btn">▶</div></div><div class="video-info"><p>脂肪燃焼HIIT</p><div class="video-cat">有酸素</div></div></div>
+    <div class="video-card"><div class="video-thumb" style="background:var(--g3)">💪<div class="play-btn">▶</div></div><div class="video-info"><p>背中を鍛えるBIG3</p><div class="video-cat">筋トレ</div></div></div>
+    <div class="video-card"><div class="video-thumb" style="background:var(--b2)">🥗<div class="play-btn">▶</div></div><div class="video-info"><p>筋トレ飯レシピ</p><div class="video-cat">食事</div></div></div>
+    <div class="video-card"><div class="video-thumb" style="background:var(--g1)">🤸<div class="play-btn">▶</div></div><div class="video-info"><p>肩こり解消ルーティン</p><div class="video-cat">ストレッチ</div></div></div>
+  </div>
+</div>
+
+<!-- PHOTOS -->
+<div id="s-photo" class="screen">
+  <div class="topbar">
+    <div class="topbar-logo"><span>🐨</span> 写真</div>
+    <div class="topbar-user" id="user-badge3">user001</div>
+  </div>
+  <div style="padding:12px 16px 4px"><div class="filter-bar" style="padding:0"><button class="filter-btn active">すべて</button><button class="filter-btn">ジムの様子</button><button class="filter-btn">ビフォーアフター</button></div></div>
+  <div class="photo-grid">
+    <div class="photo-item">🐨</div><div class="photo-item">🏋️</div><div class="photo-item">💪</div>
+    <div class="photo-item">🧘</div><div class="photo-item">🌿</div><div class="photo-item">🏃</div>
+    <div class="photo-item">🤸</div><div class="photo-item">🥗</div><div class="photo-item">⚡</div>
+  </div>
+  <p style="font-size:12px;color:#999;text-align:center;padding:16px">タップして拡大表示</p>
+</div>
+
+<!-- COUPON -->
+<div id="s-coupon" class="screen">
+  <div class="topbar">
+    <div class="topbar-logo"><span>🐨</span> クーポン</div>
+    <div class="topbar-user" id="user-badge4">user001</div>
+  </div>
+  <div style="padding:16px 0 0">
+    <div class="coupon-card">
+      <div class="coupon-header"><div class="ico">🎟</div><div><h3>プロテインドリンク割引</h3><p>来店時にスタッフに提示してください</p></div></div>
+      <div class="coupon-body">
+        <div class="coupon-discount"><span>¥</span>500<span>OFF</span></div>
+        <div class="coupon-desc">プロテインドリンク1杯に使えます</div>
+        <div class="coupon-expiry">有効期限：2025年4月30日</div>
+        <div class="coupon-barcode">🐨 KOALA-2504-A7X2</div>
+      </div>
+    </div>
+    <div class="coupon-card" style="opacity:.5">
+      <div class="coupon-header" style="background:#999"><div class="ico">🎟</div><div><h3>入会紹介割引</h3><p>このクーポンは使用済みです</p></div></div>
+      <div class="coupon-body">
+        <div class="coupon-discount" style="color:#999"><span>¥</span>1,000<span>OFF</span></div>
+        <div class="coupon-desc">ご友人紹介時に適用</div>
+        <div class="coupon-expiry" style="color:#999">使用済み</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BLOG -->
+<div id="s-blog" class="screen">
+  <div class="topbar">
+    <div class="topbar-logo"><span>🐨</span> 店長の独り言</div>
+    <div class="topbar-user" id="user-badge5">user001</div>
+  </div>
+  <div style="padding:16px 0 0">
+    <div class="blog-card">
+      <div class="blog-meta"><div class="avatar">店</div><div><div class="blog-author">店長・田中</div><div class="blog-date">2025年4月14日</div></div></div>
+      <h3>春のトレーニングのすすめ🌸</h3>
+      <p>暖かくなってきましたね！春は体を動かすのに最高の季節。外でのランニングも気持ちいいですよ。ジムと外トレを組み合わせてみませんか？</p>
+      <span class="blog-read">続きを読む →</span>
+    </div>
+    <div class="blog-card">
+      <div class="blog-meta"><div class="avatar">店</div><div><div class="blog-author">店長・田中</div><div class="blog-date">2025年4月10日</div></div></div>
+      <h3>筋肉痛との上手な付き合い方💪</h3>
+      <p>「筋肉痛＝効いてる証拠」は半分正解。適切な休息とプロテインが大事です。無理せず継続することが一番の近道！</p>
+      <span class="blog-read">続きを読む →</span>
+    </div>
+    <div class="blog-card">
+      <div class="blog-meta"><div class="avatar">店</div><div><div class="blog-author">店長・田中</div><div class="blog-date">2025年4月5日</div></div></div>
+      <h3>新しいマシン入りました！🎉</h3>
+      <p>ケーブルマシンを新しくしました。前よりも滑らかで使いやすいと思います。ぜひ体験してみてください。使い方わからない方は気軽に声かけてね。</p>
+      <span class="blog-read">続きを読む →</span>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav" id="bottom-nav" style="display:none">
+  <button class="nav-item active" onclick="showScreen('home',this)"><span class="nav-icon">🏠</span><span class="nav-label">ホーム</span></button>
+  <button class="nav-item" onclick="showScreen('video',this)"><span class="nav-icon">🎬</span><span class="nav-label">動画</span></button>
+  <button class="nav-item" onclick="showScreen('photo',this)"><span class="nav-icon">🖼</span><span class="nav-label">写真</span></button>
+  <button class="nav-item" onclick="showScreen('coupon',this)"><span class="nav-icon">🎟</span><span class="nav-label">クーポン</span></button>
+  <button class="nav-item" onclick="showScreen('blog',this)"><span class="nav-icon">📝</span><span class="nav-label">ブログ</span></button>
+</nav>
+
+<script>
+function doLogin(){
+  var id=document.getElementById('inp-id').value.trim();
+  var pw=document.getElementById('inp-pw').value.trim();
+  if(!id||!pw){alert('IDとパスワードを入力してください');return;}
+  document.querySelectorAll('[id^=user-badge]').forEach(function(el){el.textContent=id;});
+  document.getElementById('s-login').classList.remove('active');
+  document.getElementById('s-home').classList.add('active');
+  document.getElementById('bottom-nav').style.display='flex';
+}
+function showScreen(name,btn){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('s-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+document.querySelectorAll('.filter-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    this.closest('.filter-bar, div').querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
+    this.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
